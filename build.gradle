@@ -1,0 +1,36 @@
+plugins {
+    id 'java'
+    id 'io.franzbecker.gradle-lombok' version '1.14'
+}
+
+repositories {
+    mavenCentral()
+}
+
+version = '2.0'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+group 'com.revolut'
+version '1.0'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    compile 'org.eclipse.jetty:jetty-server:9.4.18.v20190429'
+    compile 'org.eclipse.jetty:jetty-servlet:9.4.18.v20190429'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
+    compile 'ch.qos.logback:logback-classic:1.2.3'
+    compile 'postgresql:postgresql:9.1-901-1.jdbc4'
+
+    compileOnly 'org.projectlombok:lombok:1.16.18'
+
+    testCompile 'org.testng:testng:6.14.3'
+    testCompile 'org.assertj:assertj-core:3.12.2'
+    testCompile 'org.apache.httpcomponents:httpclient:4.5.8'
+}
+
+test {
+    useTestNG()
+}
