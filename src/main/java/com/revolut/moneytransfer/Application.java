@@ -22,6 +22,9 @@ public class Application {
         Server server = new Server(PORT);
         server.setHandler(createServletHandler());
         server.start();
+
+        System.out.println(server.getURI());
+
         server.join();
     }
 
