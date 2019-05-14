@@ -25,7 +25,7 @@ public final class Account {
     @JsonCreator
     public Account(
             @NonNull @JsonProperty("accountId") UUID accountId,
-            @NonNull @JsonProperty("holderName") String holderName) {
+            @JsonProperty("holderName") String holderName) {
         this.accountId = accountId;
         this.holderName = holderName;
     }
