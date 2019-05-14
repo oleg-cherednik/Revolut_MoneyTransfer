@@ -24,6 +24,7 @@ public final class AccountDao extends BaseDao {
         super(dataSource);
     }
 
+    @NonNull
     public Account save(String holderName, long cents) throws SQLException {
         UUID accountId = UUID.randomUUID();
 
@@ -34,8 +35,8 @@ public final class AccountDao extends BaseDao {
 
         if (ps.executeUpdate() == 0)
             throw new SQLException("Cannot create new account");
-        else
-            return new Account(accountId, holderName);
+
+        return new Account(accountId, holderName);
     }
 
     public Account findById(@NonNull UUID accountId) throws SQLException {

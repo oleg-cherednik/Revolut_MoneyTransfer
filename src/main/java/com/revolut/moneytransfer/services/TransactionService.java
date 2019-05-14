@@ -5,6 +5,7 @@ import com.revolut.moneytransfer.dao.TransactionDao;
 import com.revolut.moneytransfer.model.Account;
 import com.revolut.moneytransfer.model.Transaction;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
@@ -17,15 +18,13 @@ import java.util.UUID;
  * @since 10.05.2019
  */
 @Slf4j
+@RequiredArgsConstructor
 public final class TransactionService {
 
+    @NonNull
     private final TransactionDao transactionDao;
+    @NonNull
     private final AccountDao accountDao;
-
-    TransactionService(@NonNull TransactionDao transactionDao, @NonNull AccountDao accountDao) {
-        this.transactionDao = transactionDao;
-        this.accountDao = accountDao;
-    }
 
     public long generateTransactionId() throws SQLException {
         return transactionDao.getNextTransactionId();

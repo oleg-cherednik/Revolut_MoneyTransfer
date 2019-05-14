@@ -35,7 +35,7 @@ public final class DataSourceLocator {
     @NonNull
     public static DataSource createDataSource() {
         JdbcDataSource dataSource = new JdbcDataSource();
-        dataSource.setURL("jdbc:h2:~/rev;AUTO_SERVER=TRUE");
+        dataSource.setURL("jdbc:h2:mem:revolut;DB_CLOSE_DELAY=-1");
         dataSource.setUser("sa");
         dataSource.setPassword("");
         return init(dataSource);

@@ -49,6 +49,8 @@ public class HighLoadTest extends JettyTestGroup {
         assertThat(oneAccount).isNotNull();
         assertThat(twoAccount).isNotNull();
         assertThat(oneAccount.getVersion()).isEqualTo(twoAccount.getVersion());
+        assertThat(oneAccount.getVersion()).isGreaterThanOrEqualTo(0);
+        assertThat(twoAccount.getVersion()).isGreaterThanOrEqualTo(0);
         assertThat(oneAccount.getCents() + twoAccount.getCents()).isEqualTo(oneCents + twoCents);
     }
 
@@ -64,7 +66,7 @@ public class HighLoadTest extends JettyTestGroup {
             params.put("destAccountId", dest);
             params.put("cents", cents);
 
-            HttpResponse resp = doPost(TransactionsEndPoint.URI, params);
+            HttpResponse resp = doPost(TransactionsEndPoint.URI + '/' + getTransactionId(), params);
             assertThatHttpResponse(resp).hasNotStatusCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 
             return null;

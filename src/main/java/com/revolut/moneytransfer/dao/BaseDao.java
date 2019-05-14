@@ -18,12 +18,14 @@ abstract class BaseDao {
     @NonNull
     private final DataSource dataSource;
 
+    @NonNull
     public final Connection getManualConnection() throws SQLException {
         Connection connection = dataSource.getConnection();
         connection.setAutoCommit(false);
         return connection;
     }
 
+    @NonNull
     public final Connection getConnection() throws SQLException {
         Connection connection = dataSource.getConnection();
         connection.setAutoCommit(true);

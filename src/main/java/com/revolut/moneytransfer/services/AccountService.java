@@ -17,6 +17,7 @@ import java.util.UUID;
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public final class AccountService {
 
+    @NonNull
     private final AccountDao dao;
 
     public Account create(String holderName, long cents) throws SQLException {
@@ -30,7 +31,7 @@ public final class AccountService {
         return dao.findById(accountId);
     }
 
-    private static void centsShouldNotBeNegative(long cents)  {
+    private static void centsShouldNotBeNegative(long cents) {
         if (cents < 0)
             throw new IllegalArgumentException("Amount of cents should not be negative: cents='" + cents + '\'');
     }
