@@ -34,6 +34,10 @@ public final class AccountsEndPoint extends HttpServlet {
 
     private final ServiceLocator serviceLocator = ServiceLocator.getInstance();
 
+    /**
+     * Find account by <tt>accountId</tt>.<br>
+     * Retrieve http status <tt>200 OK</tt> if account found and account json in the response's body or <tt>404 Not Found</tt> if not found.
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         log.debug(req.toString());

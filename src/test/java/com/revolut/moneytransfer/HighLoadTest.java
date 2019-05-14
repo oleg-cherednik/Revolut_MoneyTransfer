@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Oleg Cherednik
  * @since 14.05.2019
  */
-@Test(groups = "load")
+@Test(groups = "it")
 public class HighLoadTest extends JettyTestGroup {
 
     private static final int ATTEMPTS = 500;

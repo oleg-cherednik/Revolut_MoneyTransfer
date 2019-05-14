@@ -44,6 +44,7 @@ public final class TransactionService {
         log.error("transactionId='{}': {}", transactionId, errorReason);
     }
 
+    @NonNull
     public Transaction.Status process(@NonNull Transaction transaction) throws SQLException {
         log.debug("transactionId='{}': processing", transaction.getTransactionId());
 
@@ -62,7 +63,7 @@ public final class TransactionService {
     }
 
     @SuppressWarnings("AssignmentReplaceableWithOperatorAssignment")
-    private boolean transferCentsWithTransaction(Transaction transaction, Account srcAccount) throws SQLException {
+    private boolean transferCentsWithTransaction(@NonNull Transaction transaction, @NonNull Account srcAccount) throws SQLException {
         try (Connection conn = transactionDao.getManualConnection()) {
             log.debug("transactionId='{}': start transfer", transaction.getTransactionId());
 

@@ -36,8 +36,8 @@ public final class TransactionsEndPoint extends HttpServlet {
     private final ServiceLocator serviceLocator = ServiceLocator.getInstance();
 
     /**
-     * Retrieve transaction status by given <tt>transactionId</tt>. In case of <tt>transactionId</tt> was not found, then return http status <tt>404
-     * Not Found</tt>.
+     * Retrieve transaction status by given <tt>transactionId</tt>.<br>
+     * In case of <tt>transactionId</tt> was not found, then return http status <tt>404 Not Found</tt>.
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -66,6 +66,11 @@ public final class TransactionsEndPoint extends HttpServlet {
             super.doGet(req, resp);
     }
 
+    /**
+     * Create new transfer for given <tt>transferId</tt> and execute it.<br>
+     * Retrieve http status <tt>200 OK</tt> in case of transaction was successfully created. In the body, retrieves {@link Transaction.Status}. In
+     * case of {@link Transaction.Status#ERROR}, it means that transfer was canceled (in most cases because optimistic lock exception).
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         log.debug(req.toString());

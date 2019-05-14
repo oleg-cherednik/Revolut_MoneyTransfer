@@ -1,6 +1,8 @@
 package com.revolut.moneytransfer.services;
 
+import com.revolut.moneytransfer.dao.AccountDao;
 import com.revolut.moneytransfer.dao.DataSourceLocator;
+import com.revolut.moneytransfer.dao.TransactionDao;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,9 +19,11 @@ public final class ServiceLocator {
     private static final ServiceLocator INSTANCE = new ServiceLocator();
 
     private final DataSourceLocator dataSourceLocator = DataSourceLocator.getInstance();
-    private final AccountService accountService = new AccountService(dataSourceLocator.getAccountDao());
-    private final TransactionService transactionService =
-            new TransactionService(dataSourceLocator.getTransactionDao(), dataSourceLocator.getAccountDao());
+    private final AccountDao accountDao = dataSourceLocator.getAccountDao();
+    private final TransactionDao transactionDao = dataSourceLocator.getTransactionDao();
+
+    private final AccountService accountService = new AccountService(accountDao);
+    private final TransactionService transactionService = new TransactionService(transactionDao, accountDao);
 
     @NonNull
     public static ServiceLocator getInstance() {

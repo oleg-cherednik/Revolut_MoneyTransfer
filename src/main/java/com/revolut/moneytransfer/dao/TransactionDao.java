@@ -38,6 +38,7 @@ public final class TransactionDao extends BaseDao {
     public Transaction findById(long transactionId) throws SQLException {
         PreparedStatement ps = getConnection().prepareStatement(SQL_FIND_BY_ID);
         ps.setLong(1, transactionId);
+
         ResultSet rs = ps.executeQuery();
 
         if (!rs.next())
@@ -64,8 +65,8 @@ public final class TransactionDao extends BaseDao {
 
         if (ps.executeUpdate() == 0)
             throw new SQLException("Cannot create new account");
-        else
-            return new Transaction(transactionId, srcAccountId, destAccountId, cents);
+
+        return new Transaction(transactionId, srcAccountId, destAccountId, cents);
     }
 
     public boolean setErrorStatus(long transactionId, String errorReason) throws SQLException {
@@ -76,8 +77,7 @@ public final class TransactionDao extends BaseDao {
         return updateStatus(transactionId, Transaction.Status.ACCOMPLISHED, null, conn) == 1;
     }
 
-    private int updateStatus(long transactionId, @NonNull Transaction.Status status, String errorReason, Connection conn)
-            throws SQLException {
+    private int updateStatus(long transactionId, @NonNull Transaction.Status status, String errorReason, Connection conn) throws SQLException {
         if (conn == null)
             conn = getConnection();
 
@@ -85,6 +85,7 @@ public final class TransactionDao extends BaseDao {
         ps.setString(1, status.name());
         ps.setString(2, errorReason);
         ps.setLong(3, transactionId);
+
         return ps.executeUpdate();
     }
 

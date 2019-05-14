@@ -36,16 +36,17 @@ public class JettyTestGroup {
 
     private static Server server;
 
-    @BeforeGroups({ "it", "load" })
+    @BeforeGroups("it")
     public void startJetty() throws Exception {
         server = new Server(0);
         server.setHandler(createServletHandler());
         server.start();
     }
 
-    @AfterGroups({ "it", "load" })
+    @AfterGroups("it")
     public void stopJetty() throws Exception {
         server.stop();
+        server = null;
     }
 
     public static HttpResponse doGet(@NonNull String uri) {
@@ -110,6 +111,5 @@ public class JettyTestGroup {
 
         throw new RuntimeException("Internal error while findTransactionById");
     }
-
 
 }

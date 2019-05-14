@@ -41,6 +41,7 @@ public final class AccountDao extends BaseDao {
     public Account findById(@NonNull UUID accountId) throws SQLException {
         PreparedStatement ps = getConnection().prepareStatement(SQL_FIND_BY_ID);
         ps.setString(1, String.valueOf(accountId));
+
         ResultSet rs = ps.executeQuery();
 
         if (!rs.next())
@@ -59,6 +60,7 @@ public final class AccountDao extends BaseDao {
         ps.setLong(2, version + 1);
         ps.setString(3, String.valueOf(accountId));
         ps.setLong(4, version);
+
         return ps.executeUpdate() == 1;
     }
 

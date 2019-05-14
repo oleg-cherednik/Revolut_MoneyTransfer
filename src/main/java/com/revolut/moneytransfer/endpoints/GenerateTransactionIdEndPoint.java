@@ -29,7 +29,7 @@ public final class GenerateTransactionIdEndPoint extends HttpServlet {
 
     /**
      * Generate new <tt>transactionId</tt> for a new transfer. This <tt>transactionId</tt> could be used only once.<br>
-     * New <tt>transactionId</tt> should be generated each time before new transfer.
+     * New <tt>transactionId</tt> should be generated each time before new transfer create.
      */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
