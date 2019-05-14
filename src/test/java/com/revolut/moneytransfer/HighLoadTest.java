@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -41,8 +40,7 @@ public class HighLoadTest extends JettyTestGroup {
                                               .mapToObj(i -> transferTask(one, two, 50, random))
                                               .collect(Collectors.toList());
 
-        ExecutorService service = Executors.newFixedThreadPool(THREADS);
-        service.invokeAll(tasks);
+        Executors.newFixedThreadPool(THREADS).invokeAll(tasks);
 
         Account oneAccount = findAccountById(one);
         Account twoAccount = findAccountById(two);
