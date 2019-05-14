@@ -100,8 +100,8 @@ public final class TransactionsEndPoint extends HttpServlet {
             super.doPost(req, resp);
     }
 
-    private static final String SQL_STATE_FOREIGN_KEY_VIOLATION = "23503";
-    private static final String SQL_STATE_CHECK_VIOLATION = "23514";
+    private static final String SQL_STATE_FOREIGN_KEY_VIOLATION = "23506";
+    private static final String SQL_STATE_CHECK_VIOLATION = "23513";
     private static final String SQL_STATE_UNIQUE_VIOLATION = "23505";
     private static final Set<String> SQL_STATES =
             new HashSet<>(Arrays.asList(SQL_STATE_FOREIGN_KEY_VIOLATION, SQL_STATE_CHECK_VIOLATION, SQL_STATE_UNIQUE_VIOLATION));
