@@ -48,7 +48,6 @@ public class JettyTestGroup {
     public static HttpResponse doGet(@NonNull String uri) {
         try {
             HttpClient client = HttpClientBuilder.create().build();
-//            HttpGet get = new HttpGet(URI.create("http://localhost:8080").resolve(uri));
             HttpGet get = new HttpGet(server.getURI().resolve(uri));
             return client.execute(get);
         } catch(IOException e) {
@@ -63,7 +62,6 @@ public class JettyTestGroup {
     protected HttpResponse doPost(@NonNull String uri, @NonNull Map<String, Object> body) {
         try {
             HttpClient client = HttpClientBuilder.create().build();
-//            HttpPost post = new HttpPost(URI.create("http://localhost:8080").resolve(uri));
             HttpPost post = new HttpPost(server.getURI().resolve(uri));
             post.setEntity(new StringEntity(JsonUtils.write(body)));
             return client.execute(post);
