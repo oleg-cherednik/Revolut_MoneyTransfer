@@ -22,7 +22,7 @@ dependencies {
     compile 'org.eclipse.jetty:jetty-servlet:9.4.18.v20190429'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
     compile 'ch.qos.logback:logback-classic:1.2.3'
-    compile 'postgresql:postgresql:9.1-901-1.jdbc4'
+    compile 'com.h2database:h2:1.4.199'
 
     compileOnly 'org.projectlombok:lombok:1.16.18'
 

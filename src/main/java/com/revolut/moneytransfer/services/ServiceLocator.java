@@ -1,14 +1,10 @@
 package com.revolut.moneytransfer.services;
 
-/**
- * @author Oleg Cherednik
- * @since 10.05.2019
- */
-
 import com.revolut.moneytransfer.dao.DataSourceLocator;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 /**
  * @author Oleg Cherednik
@@ -25,6 +21,7 @@ public final class ServiceLocator {
     private final TransactionService transactionService =
             new TransactionService(dataSourceLocator.getTransactionDao(), dataSourceLocator.getAccountDao());
 
+    @NonNull
     public static ServiceLocator getInstance() {
         return INSTANCE;
     }

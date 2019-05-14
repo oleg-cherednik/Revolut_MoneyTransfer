@@ -12,14 +12,14 @@ import org.eclipse.jetty.servlet.ServletHandler;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Application {
 
-    private static final int PORT = 8080;
+    private static final int PORT_APP = 8080;
 
     public static void main(String... args) throws Exception {
         startJetty();
     }
 
     private static void startJetty() throws Exception {
-        Server server = new Server(PORT);
+        Server server = new Server(PORT_APP);
         server.setHandler(createServletHandler());
         server.start();
 
