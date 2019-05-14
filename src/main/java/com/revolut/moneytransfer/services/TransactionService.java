@@ -27,12 +27,16 @@ public final class TransactionService {
         this.accountDao = accountDao;
     }
 
+    public long generateTransactionId() throws SQLException {
+        return transactionDao.getNextTransactionId();
+    }
+
     public Transaction findById(long transactionId) throws SQLException {
         return transactionDao.findById(transactionId);
     }
 
-    public Transaction create(@NonNull UUID srcAccountId, @NonNull UUID destAccountId, int cents) throws SQLException {
-        return transactionDao.save(srcAccountId, destAccountId, cents);
+    public Transaction create(long transactionId, @NonNull UUID srcAccountId, @NonNull UUID destAccountId, int cents) throws SQLException {
+        return transactionDao.save(transactionId, srcAccountId, destAccountId, cents);
     }
 
     public void setErrorStatus(long transactionId, String errorReason) throws SQLException {
@@ -40,7 +44,7 @@ public final class TransactionService {
         log.error("transactionId='{}': {}", transactionId, errorReason);
     }
 
-    public Transaction.Status process(@NonNull Transaction transaction) throws SQLException, InterruptedException {
+    public Transaction.Status process(@NonNull Transaction transaction) throws SQLException {
         log.debug("transactionId='{}': processing", transaction.getTransactionId());
 
         int cents = transaction.getCents();
@@ -58,7 +62,7 @@ public final class TransactionService {
     }
 
     @SuppressWarnings("AssignmentReplaceableWithOperatorAssignment")
-    private boolean transferCentsWithTransaction(Transaction transaction, Account srcAccount) throws SQLException, InterruptedException {
+    private boolean transferCentsWithTransaction(Transaction transaction, Account srcAccount) throws SQLException {
         try (Connection conn = transactionDao.getManualConnection()) {
             log.debug("transactionId='{}': start transfer", transaction.getTransactionId());
 
@@ -81,9 +85,6 @@ public final class TransactionService {
 
             log.error("transactionId='{}': accounts or transaction objects have been changed (postpone)", transaction.getTransactionId());
             conn.rollback();
-
-            log.debug("transactionId='{}': wait for 500ms before retry", transaction.getTransactionId());
-            Thread.sleep(500);
 
             return false;
         }

@@ -1,12 +1,11 @@
 package com.revolut.moneytransfer.assertj;
 
 import com.revolut.moneytransfer.HttpUtils;
+import com.revolut.moneytransfer.model.Transaction;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpResponse;
 import org.assertj.core.api.AbstractAssert;
-
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,17 +43,17 @@ public class HttpResponseAssert<SELF extends HttpResponseAssert<SELF>> extends A
         return myself;
     }
 
-    public SELF isBodyUuid() {
-        String body = HttpUtils.getBodyAsString(actual);
-        assertThat(body).isNotNull();
-        assertThat(UUID.fromString(body)).isNotNull();
-        return myself;
-    }
-
     public SELF isBodyNumber() {
         String body = HttpUtils.getBodyAsString(actual);
         assertThat(body).isNotNull();
         assertThat(Long.parseLong(body)).isGreaterThanOrEqualTo(1);
+        return myself;
+    }
+
+    public SELF isBodyTransactionStatus() {
+        String body = HttpUtils.getBodyAsString(actual);
+        assertThat(body).isNotNull();
+        assertThat(Transaction.Status.valueOf(body)).isNotNull();
         return myself;
     }
 

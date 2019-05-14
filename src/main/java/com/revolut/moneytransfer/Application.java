@@ -1,6 +1,7 @@
 package com.revolut.moneytransfer;
 
 import com.revolut.moneytransfer.endpoints.AccountsEndPoint;
+import com.revolut.moneytransfer.endpoints.GenerateTransactionIdEndPoint;
 import com.revolut.moneytransfer.endpoints.TransactionsEndPoint;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -32,6 +33,7 @@ public class Application {
         ServletHandler servletHandler = new ServletHandler();
 
         servletHandler.addServletWithMapping(AccountsEndPoint.class, AccountsEndPoint.URI + "/*");
+        servletHandler.addServletWithMapping(GenerateTransactionIdEndPoint.class, GenerateTransactionIdEndPoint.URI);
         servletHandler.addServletWithMapping(TransactionsEndPoint.class, TransactionsEndPoint.URI + "/*");
 
         return servletHandler;

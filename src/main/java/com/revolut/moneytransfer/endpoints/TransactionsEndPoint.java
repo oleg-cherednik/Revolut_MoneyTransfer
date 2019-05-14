@@ -31,8 +31,7 @@ public final class TransactionsEndPoint extends HttpServlet {
 
     public static final String URI = "/transactions";
 
-    private static final Pattern TRANSACTIONS_FIND_BY_ID = Pattern.compile("(?i)^\\" + URI + "\\/(?<transactionId>\\d+)$");
-    private static final Pattern TRANSACTIONS_CREATE = Pattern.compile("(?i)^\\" + URI + '$');
+    private static final Pattern TRANSACTIONS = Pattern.compile("(?i)^\\" + URI + "\\/(?<transactionId>\\d+)$");
 
     private final ServiceLocator serviceLocator = ServiceLocator.getInstance();
 
@@ -44,7 +43,7 @@ public final class TransactionsEndPoint extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         log.debug(req.toString());
 
-        Matcher matcher = TRANSACTIONS_FIND_BY_ID.matcher(req.getRequestURI());
+        Matcher matcher = TRANSACTIONS.matcher(req.getRequestURI());
 
         if (matcher.matches()) {
             try {
@@ -70,12 +69,13 @@ public final class TransactionsEndPoint extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         log.debug(req.toString());
-        Matcher matcher = TRANSACTIONS_CREATE.matcher(req.getRequestURI());
+        Matcher matcher = TRANSACTIONS.matcher(req.getRequestURI());
 
         if (matcher.matches()) {
-            Transaction transaction = createTransaction(req, resp);
-
             try {
+                long transactionId = Long.parseLong(matcher.group("transactionId"));
+                Transaction transaction = createTransaction(transactionId, HttpUtils.getBody(req), resp);
+
                 if (transaction != null) {
                     Transaction.Status status = serviceLocator.getTransactionService().process(transaction);
 
@@ -90,15 +90,13 @@ public final class TransactionsEndPoint extends HttpServlet {
             super.doPost(req, resp);
     }
 
-    private Transaction createTransaction(HttpServletRequest req, HttpServletResponse resp) {
+    private Transaction createTransaction(long transactionId, Map<String, Object> body, HttpServletResponse resp) {
         try {
-            Map<String, Object> body = HttpUtils.getBody(req);
-
             UUID srcAccountId = UUID.fromString((String)body.get("srcAccountId"));
             UUID destAccountId = UUID.fromString((String)body.get("destAccountId"));
             int cents = ((Number)body.get("cents")).intValue();
 
-            return serviceLocator.getTransactionService().create(srcAccountId, destAccountId, cents);
+            return serviceLocator.getTransactionService().create(transactionId, srcAccountId, destAccountId, cents);
         } catch(IllegalArgumentException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } catch(SQLException e) {

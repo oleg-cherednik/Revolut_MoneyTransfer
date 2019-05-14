@@ -54,9 +54,7 @@ public final class TransactionDao extends BaseDao {
         return transaction;
     }
 
-    public Transaction save(@NonNull UUID srcAccountId, @NonNull UUID destAccountId, int cents) throws SQLException {
-        long transactionId = getNextTransactionId();
-
+    public Transaction save(long transactionId, @NonNull UUID srcAccountId, @NonNull UUID destAccountId, int cents) throws SQLException {
         PreparedStatement ps = getConnection().prepareStatement(SQL_INSERT);
         ps.setLong(1, transactionId);
         ps.setString(2, String.valueOf(srcAccountId));

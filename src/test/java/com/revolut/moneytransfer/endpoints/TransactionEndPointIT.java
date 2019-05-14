@@ -1,10 +1,8 @@
 package com.revolut.moneytransfer.endpoints;
 
-import com.revolut.moneytransfer.HttpUtils;
 import com.revolut.moneytransfer.JettyTestGroup;
 import com.revolut.moneytransfer.model.Account;
 import com.revolut.moneytransfer.model.Transaction;
-import com.revolut.moneytransfer.utils.JsonUtils;
 import org.apache.http.HttpResponse;
 import org.testng.annotations.Test;
 
@@ -30,7 +28,7 @@ public class TransactionEndPointIT extends JettyTestGroup {
         params.put("destAccountId", createAccount("anna", 0));
         params.put("cents", 100);
 
-        HttpResponse resp = doPost(TransactionsEndPoint.URI, params);
+        HttpResponse resp = doPost(TransactionsEndPoint.URI + '/' + getTransactionId(), params);
         assertThatHttpResponse(resp).hasStatusCode(HttpServletResponse.SC_BAD_REQUEST);
     }
 
@@ -40,7 +38,7 @@ public class TransactionEndPointIT extends JettyTestGroup {
         params.put("destAccountId", UUID.randomUUID());
         params.put("cents", 100);
 
-        HttpResponse resp = doPost(TransactionsEndPoint.URI, params);
+        HttpResponse resp = doPost(TransactionsEndPoint.URI + '/' + getTransactionId(), params);
         assertThatHttpResponse(resp).hasStatusCode(HttpServletResponse.SC_BAD_REQUEST);
     }
 
@@ -52,7 +50,7 @@ public class TransactionEndPointIT extends JettyTestGroup {
         params.put("destAccountId", accountId);
         params.put("cents", 100);
 
-        HttpResponse resp = doPost(TransactionsEndPoint.URI, params);
+        HttpResponse resp = doPost(TransactionsEndPoint.URI + '/' + getTransactionId(), params);
         assertThatHttpResponse(resp).hasStatusCode(HttpServletResponse.SC_BAD_REQUEST);
     }
 
@@ -62,7 +60,7 @@ public class TransactionEndPointIT extends JettyTestGroup {
         params.put("destAccountId", createAccount("anna", 0));
         params.put("cents", -100);
 
-        HttpResponse resp = doPost(TransactionsEndPoint.URI, params);
+        HttpResponse resp = doPost(TransactionsEndPoint.URI + '/' + getTransactionId(), params);
         assertThatHttpResponse(resp).hasStatusCode(HttpServletResponse.SC_BAD_REQUEST);
     }
 
@@ -72,11 +70,12 @@ public class TransactionEndPointIT extends JettyTestGroup {
         params.put("destAccountId", createAccount("anna", 0));
         params.put("cents", 0);
 
-        HttpResponse resp = doPost(TransactionsEndPoint.URI, params);
+        HttpResponse resp = doPost(TransactionsEndPoint.URI + '/' + getTransactionId(), params);
         assertThatHttpResponse(resp).hasStatusCode(HttpServletResponse.SC_BAD_REQUEST);
     }
 
     public void shouldCreateNewTransaction() {
+        long transactionId = getTransactionId();
         UUID srcAccountId = createAccount("oleg", 100);
         UUID destAccountId = createAccount("anna", 0);
         long cents = 100;
@@ -86,11 +85,12 @@ public class TransactionEndPointIT extends JettyTestGroup {
         params.put("destAccountId", destAccountId);
         params.put("cents", cents);
 
-        HttpResponse resp = doPost(TransactionsEndPoint.URI, params);
-        assertThatHttpResponse(resp).hasStatusCode(HttpServletResponse.SC_CREATED);
-        assertThatHttpResponse(resp).hasContentTypeWithCharset("application/json", "utf-8");
+        HttpResponse resp = doPost(TransactionsEndPoint.URI + '/' + transactionId, params);
+        assertThatHttpResponse(resp).hasStatusCode(HttpServletResponse.SC_OK);
+        assertThatHttpResponse(resp).hasContentTypeWithCharset("text/plain", "utf-8");
+        assertThatHttpResponse(resp).isBodyTransactionStatus();
 
-        Transaction transaction = JsonUtils.read(HttpUtils.getBodyAsString(resp), Transaction.class);
+        Transaction transaction = findTransactionById(transactionId);
         assertThat(transaction).isNotNull();
         assertThat(transaction.getTransactionId()).isGreaterThan(0);
         assertThat(transaction.getSrcAccountId()).isEqualTo(srcAccountId);
@@ -99,7 +99,23 @@ public class TransactionEndPointIT extends JettyTestGroup {
         assertThat(transaction.getStatus()).isEqualTo(Transaction.Status.ACCOMPLISHED);
     }
 
+    public void shouldResponseHttpStatusBadRequestWhenTransactionIdExistsForNewTransaction() {
+        long transactionId = getTransactionId();
+        UUID srcAccountId = createAccount("oleg", 100);
+        UUID destAccountId = createAccount("anna", 0);
+        long cents = 100;
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("srcAccountId", srcAccountId);
+        params.put("destAccountId", destAccountId);
+        params.put("cents", cents);
+
+        assertThatHttpResponse(doPost(TransactionsEndPoint.URI + '/' + transactionId, params)).hasStatusCode(HttpServletResponse.SC_OK);
+        assertThatHttpResponse(doPost(TransactionsEndPoint.URI + '/' + transactionId, params)).hasStatusCode(HttpServletResponse.SC_BAD_REQUEST);
+    }
+
     public void shouldTransferMoneyBetweenTwoAccountsWhenEnoughMoneyOnSrcAccount() throws InterruptedException {
+        long transactionId = getTransactionId();
         UUID srcAccountId = createAccount("oleg", 50);
         UUID destAccountId = createAccount("anna", 75);
         long cents = 25;
@@ -109,10 +125,11 @@ public class TransactionEndPointIT extends JettyTestGroup {
         params.put("destAccountId", destAccountId);
         params.put("cents", 25);
 
-        HttpResponse resp = doPost(TransactionsEndPoint.URI, params);
-        assertThatHttpResponse(resp).hasStatusCode(HttpServletResponse.SC_CREATED);
+        HttpResponse resp = doPost(TransactionsEndPoint.URI + '/' + transactionId, params);
+        assertThatHttpResponse(resp).hasStatusCode(HttpServletResponse.SC_OK);
+        assertThatHttpResponse(resp).isBodyTransactionStatus();
 
-        Transaction transaction = JsonUtils.read(HttpUtils.getBodyAsString(resp), Transaction.class);
+        Transaction transaction = findTransactionById(transactionId);
         assertThat(transaction).isNotNull();
         assertThat(transaction.getTransactionId()).isGreaterThan(0);
         assertThat(transaction.getSrcAccountId()).isEqualTo(srcAccountId);

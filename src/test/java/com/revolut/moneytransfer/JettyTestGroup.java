@@ -1,7 +1,10 @@
 package com.revolut.moneytransfer;
 
 import com.revolut.moneytransfer.endpoints.AccountsEndPoint;
+import com.revolut.moneytransfer.endpoints.GenerateTransactionIdEndPoint;
+import com.revolut.moneytransfer.endpoints.TransactionsEndPoint;
 import com.revolut.moneytransfer.model.Account;
+import com.revolut.moneytransfer.model.Transaction;
 import com.revolut.moneytransfer.utils.JsonUtils;
 import lombok.NonNull;
 import org.apache.http.HttpResponse;
@@ -90,5 +93,23 @@ public class JettyTestGroup {
 
         throw new RuntimeException("Internal error while findAccountById");
     }
+
+    protected static long getTransactionId() {
+        HttpResponse resp = doPost(GenerateTransactionIdEndPoint.URI);
+        assertThatHttpResponse(resp).hasStatusCode(HttpServletResponse.SC_OK);
+        return Long.parseLong(Objects.requireNonNull(HttpUtils.getBodyAsString(resp)));
+    }
+
+    protected static Transaction findTransactionById(long transactionId) {
+        HttpResponse resp = doGet(TransactionsEndPoint.URI + '/' + transactionId);
+
+        if (resp.getStatusLine().getStatusCode() == HttpServletResponse.SC_NOT_FOUND)
+            return null;
+        if (resp.getStatusLine().getStatusCode() == HttpServletResponse.SC_OK)
+            return JsonUtils.read(HttpUtils.getBodyAsString(resp), Transaction.class);
+
+        throw new RuntimeException("Internal error while findTransactionById");
+    }
+
 
 }
