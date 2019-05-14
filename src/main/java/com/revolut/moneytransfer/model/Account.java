@@ -3,6 +3,7 @@ package com.revolut.moneytransfer.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 import java.util.UUID;
@@ -15,13 +16,16 @@ import java.util.UUID;
 @Setter
 public final class Account {
 
+    @NonNull
     private final UUID accountId;
     private final String holderName;
     private long cents;
     private long version;
 
     @JsonCreator
-    public Account(@JsonProperty("accountId") UUID accountId, @JsonProperty("holderName") String holderName) {
+    public Account(
+            @NonNull @JsonProperty("accountId") UUID accountId,
+            @NonNull @JsonProperty("holderName") String holderName) {
         this.accountId = accountId;
         this.holderName = holderName;
     }

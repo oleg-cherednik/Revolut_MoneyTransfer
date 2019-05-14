@@ -17,7 +17,9 @@ import java.util.UUID;
 public class Transaction {
 
     private final long transactionId;
+    @NonNull
     private final UUID srcAccountId;
+    @NonNull
     private final UUID destAccountId;
     private final int cents;
     @NonNull
@@ -27,8 +29,8 @@ public class Transaction {
     @JsonCreator
     public Transaction(
             @JsonProperty("transactionId") long transactionId,
-            @JsonProperty("srcAccountId") UUID srcAccountId,
-            @JsonProperty("destAccountId") UUID destAccountId,
+            @NonNull @JsonProperty("srcAccountId") UUID srcAccountId,
+            @NonNull @JsonProperty("destAccountId") UUID destAccountId,
             @JsonProperty("cents") int cents) {
         this.transactionId = transactionId;
         this.srcAccountId = srcAccountId;
