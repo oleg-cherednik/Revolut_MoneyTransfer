@@ -97,7 +97,6 @@ public class TransactionEndPointIT extends JettyTestGroup {
         assertThat(transaction.getDestAccountId()).isEqualTo(destAccountId);
         assertThat(transaction.getCents()).isEqualTo(cents);
         assertThat(transaction.getStatus()).isEqualTo(Transaction.Status.ACCOMPLISHED);
-        assertThat(transaction.getVersion()).isEqualTo(1);
     }
 
     public void shouldTransferMoneyBetweenTwoAccountsWhenEnoughMoneyOnSrcAccount() throws InterruptedException {
@@ -120,7 +119,6 @@ public class TransactionEndPointIT extends JettyTestGroup {
         assertThat(transaction.getDestAccountId()).isEqualTo(destAccountId);
         assertThat(transaction.getCents()).isEqualTo(cents);
         assertThat(transaction.getStatus()).isEqualTo(Transaction.Status.ACCOMPLISHED);
-        assertThat(transaction.getVersion()).isEqualTo(1);
 
         Account srcAccount = findAccountById(srcAccountId);
         assertThat(srcAccount).isNotNull();

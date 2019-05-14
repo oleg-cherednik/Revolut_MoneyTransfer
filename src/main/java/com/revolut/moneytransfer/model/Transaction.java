@@ -23,7 +23,6 @@ public class Transaction {
     @NonNull
     private Status status = Status.IN_PROGRESS;
     private String errorReason;
-    private long version;
 
     @JsonCreator
     public Transaction(

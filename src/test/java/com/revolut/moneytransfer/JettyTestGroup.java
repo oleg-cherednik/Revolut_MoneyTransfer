@@ -33,14 +33,14 @@ public class JettyTestGroup {
 
     private static Server server;
 
-    @BeforeGroups("it")
+    @BeforeGroups({ "it", "load" })
     public void startJetty() throws Exception {
         server = new Server(0);
         server.setHandler(createServletHandler());
         server.start();
     }
 
-    @AfterGroups("it")
+    @AfterGroups({ "it", "load" })
     public void stopJetty() throws Exception {
         server.stop();
     }
@@ -55,11 +55,11 @@ public class JettyTestGroup {
         }
     }
 
-    protected HttpResponse doPost(@NonNull String uri) {
+    protected static HttpResponse doPost(@NonNull String uri) {
         return doPost(uri, Collections.emptyMap());
     }
 
-    protected HttpResponse doPost(@NonNull String uri, @NonNull Map<String, Object> body) {
+    protected static HttpResponse doPost(@NonNull String uri, @NonNull Map<String, Object> body) {
         try {
             HttpClient client = HttpClientBuilder.create().build();
             HttpPost post = new HttpPost(server.getURI().resolve(uri));
@@ -70,7 +70,7 @@ public class JettyTestGroup {
         }
     }
 
-    protected UUID createAccount(String holderName, long cents) {
+    protected static UUID createAccount(String holderName, long cents) {
         Map<String, Object> body = new HashMap<>();
         body.put("holderName", holderName);
         body.put("cents", cents);

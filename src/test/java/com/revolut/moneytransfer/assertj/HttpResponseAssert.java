@@ -26,6 +26,11 @@ public class HttpResponseAssert<SELF extends HttpResponseAssert<SELF>> extends A
         return myself;
     }
 
+    public SELF hasNotStatusCode(int statusCode) {
+        assertThat(actual.getStatusLine().getStatusCode()).isNotEqualTo(statusCode);
+        return myself;
+    }
+
     public SELF hasContentTypeWithCharset(String name, String charset) {
         assertThat(actual.getHeaders("Content-Type")).hasSize(1);
 

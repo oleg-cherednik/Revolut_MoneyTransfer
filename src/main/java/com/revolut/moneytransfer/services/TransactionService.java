@@ -19,8 +19,6 @@ import java.util.UUID;
 @Slf4j
 public final class TransactionService {
 
-    private static final int RETRY_COUNT = 5;
-
     private final TransactionDao transactionDao;
     private final AccountDao accountDao;
 
@@ -37,45 +35,30 @@ public final class TransactionService {
         return transactionDao.save(srcAccountId, destAccountId, cents);
     }
 
-    public Transaction process(long transactionId) throws SQLException {
-        for (int i = 1; i <= RETRY_COUNT; i++) {
-            Transaction transaction = transactionDao.findById(transactionId);
-
-            if (transaction == null)
-                throw new IllegalArgumentException("transactionId='" + transactionId + "' was not found");
-
-            if (process(transaction, i))
-                break;
-        }
-
-        return transactionDao.findById(transactionId);
+    public void setErrorStatus(long transactionId, String errorReason) throws SQLException {
+        transactionDao.setErrorStatus(transactionId, errorReason);
+        log.error("transactionId='{}': {}", transactionId, errorReason);
     }
 
-    private boolean process(@NonNull Transaction transaction, int retryCount) throws SQLException {
-        log.debug("transactionId='{}': processing (retryCount={})", transaction.getTransactionId(), retryCount);
+    public Transaction.Status process(@NonNull Transaction transaction) throws SQLException, InterruptedException {
+        log.debug("transactionId='{}': processing", transaction.getTransactionId());
 
         int cents = transaction.getCents();
         Account src = accountDao.findById(transaction.getSrcAccountId());
 
         assert src != null : "accountId='" + transaction.getSrcAccountId() + "' was not found";
 
-        if (src.getCents() >= cents)
-            return transferCentsWithTransaction(transaction, src);
+        if (src.getCents() < cents) {
+            String errorReason = "Account '" + src.getAccountId() + "' does not have enough cents: required '" + cents + "' cents";
+            setErrorStatus(transaction.getTransactionId(), errorReason);
+        } else if (!transferCentsWithTransaction(transaction, src))
+            setErrorStatus(transaction.getTransactionId(), "Optimistic lock exception");
 
-        String errorReason = "Account '" + src.getAccountId() + "' does not have enough cents: required '" + cents + "' cents";
-        boolean statusUpdated = transactionDao.setErrorStatus(transaction.getTransactionId(), transaction.getVersion(), errorReason);
-
-        if (statusUpdated) {
-            log.error("transactionId='{}': {}", transaction.getTransactionId(), errorReason);
-            return true;
-        }
-
-        log.error("transactionId='{}': transaction objects has been changed (postpone)", transaction.getTransactionId());
-        return false;
+        return Objects.requireNonNull(transactionDao.findById(transaction.getTransactionId())).getStatus();
     }
 
     @SuppressWarnings("AssignmentReplaceableWithOperatorAssignment")
-    private boolean transferCentsWithTransaction(Transaction transaction, Account srcAccount) throws SQLException {
+    private boolean transferCentsWithTransaction(Transaction transaction, Account srcAccount) throws SQLException, InterruptedException {
         try (Connection conn = transactionDao.getManualConnection()) {
             log.debug("transactionId='{}': start transfer", transaction.getTransactionId());
 
@@ -88,7 +71,7 @@ public final class TransactionService {
 
             boolean success = accountDao.setCents(srcAccountId, srcAccount.getVersion(), srcAccount.getCents() - cents, conn);
             success = success && accountDao.setCents(destAccountId, destAccount.getVersion(), destAccount.getCents() + cents, conn);
-            success = success && transactionDao.setAccomplishedStatus(transactionId, transaction.getVersion(), conn);
+            success = success && transactionDao.setAccomplishedStatus(transactionId, conn);
 
             if (success) {
                 log.debug("transactionId='{}': accomplished", transaction.getTransactionId());
@@ -98,6 +81,10 @@ public final class TransactionService {
 
             log.error("transactionId='{}': accounts or transaction objects have been changed (postpone)", transaction.getTransactionId());
             conn.rollback();
+
+            log.debug("transactionId='{}': wait for 500ms before retry", transaction.getTransactionId());
+            Thread.sleep(500);
+
             return false;
         }
     }

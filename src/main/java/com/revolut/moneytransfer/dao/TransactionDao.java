@@ -19,7 +19,7 @@ public final class TransactionDao extends BaseDao {
     private static final String SQL_NEXT_TRANSACTION_ID = "select nextval('transaction_id')";
     private static final String SQL_FIND_BY_ID = "select * from transactions where transaction_id = ?";
     private static final String SQL_INSERT = "insert into transactions(transaction_id, src_account_id, dest_account_id, cents, status) values (?, ?, ?, ?, ?)";
-    private static final String SQL_UPDATE_STATUS = "update transactions set status = ?, error_reason = ?, version = ? where transaction_id = ? and version = ?";
+    private static final String SQL_UPDATE_STATUS = "update transactions set status = ?, error_reason = ? where transaction_id = ?";
 
     TransactionDao(@NonNull DataSource dataSource) {
         super(dataSource);
@@ -50,7 +50,6 @@ public final class TransactionDao extends BaseDao {
         Transaction transaction = new Transaction(transactionId, srcAccountId, destAccountId, cents);
         transaction.setStatus(Transaction.Status.valueOf(rs.getString("status")));
         transaction.setErrorReason(rs.getString("error_reason"));
-        transaction.setVersion(rs.getLong("version"));
 
         return transaction;
     }
@@ -71,15 +70,15 @@ public final class TransactionDao extends BaseDao {
             return new Transaction(transactionId, srcAccountId, destAccountId, cents);
     }
 
-    public boolean setErrorStatus(long transactionId, long version, String errorReason) throws SQLException {
-        return updateStatus(transactionId, version, Transaction.Status.ERROR, errorReason, null) == 1;
+    public boolean setErrorStatus(long transactionId, String errorReason) throws SQLException {
+        return updateStatus(transactionId, Transaction.Status.ERROR, errorReason, null) == 1;
     }
 
-    public boolean setAccomplishedStatus(long transactionId, long version, @NonNull Connection conn) throws SQLException {
-        return updateStatus(transactionId, version, Transaction.Status.ACCOMPLISHED, null, conn) == 1;
+    public boolean setAccomplishedStatus(long transactionId, @NonNull Connection conn) throws SQLException {
+        return updateStatus(transactionId, Transaction.Status.ACCOMPLISHED, null, conn) == 1;
     }
 
-    private int updateStatus(long transactionId, long version, @NonNull Transaction.Status status, String errorReason, Connection conn)
+    private int updateStatus(long transactionId, @NonNull Transaction.Status status, String errorReason, Connection conn)
             throws SQLException {
         if (conn == null)
             conn = getConnection();
@@ -87,9 +86,7 @@ public final class TransactionDao extends BaseDao {
         PreparedStatement ps = conn.prepareStatement(SQL_UPDATE_STATUS);
         ps.setString(1, status.name());
         ps.setString(2, errorReason);
-        ps.setLong(3, version + 1);
-        ps.setLong(4, transactionId);
-        ps.setLong(5, version);
+        ps.setLong(3, transactionId);
         return ps.executeUpdate();
     }
 

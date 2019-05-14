@@ -73,31 +73,45 @@ public final class TransactionsEndPoint extends HttpServlet {
         Matcher matcher = TRANSACTIONS_CREATE.matcher(req.getRequestURI());
 
         if (matcher.matches()) {
+            Transaction transaction = createTransaction(req, resp);
+
             try {
-                Map<String, Object> body = HttpUtils.getBody(req);
+                if (transaction != null) {
+                    Transaction.Status status = serviceLocator.getTransactionService().process(transaction);
 
-                UUID srcAccountId = UUID.fromString((String)body.get("srcAccountId"));
-                UUID destAccountId = UUID.fromString((String)body.get("destAccountId"));
-                int cents = ((Number)body.get("cents")).intValue();
-
-                Transaction transaction = serviceLocator.getTransactionService().create(srcAccountId, destAccountId, cents);
-                transaction = serviceLocator.getTransactionService().process(transaction.getTransactionId());
-
-                resp.setStatus(HttpServletResponse.SC_CREATED);
-                resp.setContentType("application/json;charset=utf-8");
-                resp.getWriter().println(JsonUtils.write(transaction));
-            } catch(IllegalArgumentException e) {
-                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            } catch(SQLException e) {
-                if (SQL_STATES.contains(e.getSQLState()))
-                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                else
-                    resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    resp.setContentType("text/plain;charset=utf-8");
+                    resp.getWriter().println(status);
+                }
             } catch(Exception e) {
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
         } else
             super.doPost(req, resp);
+    }
+
+    private Transaction createTransaction(HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            Map<String, Object> body = HttpUtils.getBody(req);
+
+            UUID srcAccountId = UUID.fromString((String)body.get("srcAccountId"));
+            UUID destAccountId = UUID.fromString((String)body.get("destAccountId"));
+            int cents = ((Number)body.get("cents")).intValue();
+
+            return serviceLocator.getTransactionService().create(srcAccountId, destAccountId, cents);
+        } catch(IllegalArgumentException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } catch(SQLException e) {
+            if (SQL_STATES.contains(e.getSQLState()))
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            else {
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
+        } catch(Exception e) {
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+
+        return null;
     }
 
     private static final String SQL_STATE_FOREIGN_KEY_VIOLATION = "23506";

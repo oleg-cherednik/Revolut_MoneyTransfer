@@ -68,7 +68,6 @@ public final class DataSourceLocator {
             "cents           int         not null check (cents > 0),\n" +
             "status          varchar(15) not null,\n" +
             "error_reason    varchar(255),\n" +
-            "version         int         not null default 0,\n" +
             "foreign key (src_account_id) references accounts (account_id),\n" +
             "foreign key (dest_account_id) references accounts (account_id))";
 
