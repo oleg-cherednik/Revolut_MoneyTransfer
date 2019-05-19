@@ -1,0 +1,240 @@
+swagger: "2.0"
+info:
+  description: This is Backend test for `Revolut`. As REST end points and Dependency Injection (DI) it uses custom implementation; H2 as embedded database
+  version: '1.0'
+  title: MoneyTransdfer Service
+  contact:
+    email: abba-best@yandx.ru
+host: localhost:8080
+basePath: /
+schemes:
+  - http
+tags:
+  - name: Account
+    description: Everything abount an account
+  - name: Transaction
+    description: Everything abount a transacrion
+paths:
+  /account:
+    post:
+      tags:
+        - Account
+      summary: Create new account
+      consumes:
+        - application/json
+      produces:
+        - text/plain
+      parameters:
+        - in: body
+          name: body
+          description: Account initial data
+          required: true
+          schema:
+            type: object
+            properties:
+              holderName:
+                type: string
+                example: John Doe
+              cents:
+                type: integer
+                format: int64
+                minimum: 0
+                example: 100
+                default: 0
+      responses:
+        201:
+          description: New account was successfully created
+          schema:
+            type: string
+            format: uuid
+            description: AccountID
+            example: '878c8625-a923-45df-8e4d-71f9361242fb'
+        400:
+          description: Request contains invalid data
+        500:
+          description: Server internal problem
+  /accounts/{accountId}:
+    get:
+      tags:
+        - Account
+      summary: Find account by AccountID
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: accountId
+          required: true
+          description: Unique AccountID
+          type: string
+          format: uuid
+      responses:
+        200:
+          description: Account with given AccountID is found
+          schema:
+            $ref: '#/definitions/Account'
+        404:
+          description: Account with given AccountID is not found
+  /transactions/newId:
+    post:
+      tags:
+        - Transaction
+      summary: Generate new Transaction ID
+      description: To prevernt network problem, client should generate new TransactionID for each new transaction.
+      consumes:
+        - application/json
+      produces:
+        - text/plain
+      responses:
+        200:
+          description: New TransactionId was successfully generated
+          schema:
+            type: integer
+            format: int64
+            example: 0
+        500:
+          description: Server internal problem
+  /transactions/{transactionId}:
+    post:
+      tags:
+        - Transaction
+      summary: Transfer money under TransferID
+      description: Do money transfer between given accounts under given TransferID. TransferID could be used only once.
+      consumes:
+        - application/json
+      produces:
+        - text/plain
+      parameters:
+        - in: path
+          name: transactionId
+          required: true
+          description: Unique TransactinID
+          type: integer
+          format: int64
+        - in: body
+          name: body
+          description: Money transfer data
+          required: true
+          schema:
+            type: object
+            required:
+              - srcAccountId
+              - destAccountId
+              - cents
+            properties:
+              srcAccountId:
+                type: string
+                format: uuid
+                description: Source account
+                example: '878c8625-a923-45df-8e4d-71f9361242fb'
+              destAccountId:
+                type: string
+                format: uuid
+                description: Destination account
+                example: '9c970276-e76b-44cf-a7e8-f50680b903ab'
+              cents:
+                type: integer
+                format: int32
+                description: Amount of cents to transfer
+                minimum: 0
+                example: 100
+      responses:
+        200:
+          description: Transaction was created and executed. See transaction status in the response body
+          schema:
+            $ref: '#/definitions/TransactionStatus'
+        400:
+          description: Request contains invalid data
+        500:
+          description: Server internal problem
+    get:
+      tags:
+        - Transaction
+      summary: Find transaction by TransactionID
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: transactionId
+          required: true
+          description: Unique TransactinID
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: Transaction with given TransactionID is found
+          schema:
+            $ref: '#/definitions/Transaction'
+        404:
+          description: Transaction with given TransactionID is not found
+definitions:
+  Account:
+    type: object
+    required:
+      - accountId
+      - cents
+      - version
+    properties:
+      accountId:
+        type: string
+        format: uuid
+        description: Unique AccountID
+        example: '878c8625-a923-45df-8e4d-71f9361242fb'
+      holderName:
+        type: string
+        example: John Doe
+      cents:
+        type: integer
+        format: int64
+        description: Ammount of cents on the account
+        example: 100
+      version:
+        type: integer
+        format: int64
+        description: Version of the account data
+        example: 0
+  TransactionStatus:
+    type: string
+    enum:
+      - IN_PROGRESS
+      - ACCOMPLISHED
+      - ERROR
+  Transaction:
+    type: object
+    required:
+      - transactionId
+      - srcAccountId
+      - destAccountID
+      - cents
+      - status
+    properties:
+      transactionId:
+        type: integer
+        format: int64
+        description: Unique TransactionID
+        example: 0
+      srcAccountId:
+        type: string
+        format: uuid
+        description: Source AccountID
+        example: '878c8625-a923-45df-8e4d-71f9361242fb'
+      destAccountId:
+        type: string
+        format: uuid
+        description: Destination AccountID
+        example: '9c970276-e76b-44cf-a7e8-f50680b903ab'
+      cents:
+        type: integer
+        format: int32
+        description: "Current ammount of cente on the current account"
+        minimum: 1
+        example: 100
+      status:
+        $ref: '#/definitions/TransactionStatus'
+      errorReason:
+        type: string
+        description: Error reason details in case of status is ERROR
+        example: "Account '878c8625-a923-45df-8e4d-71f9361242fb' does not have enough cents: required '100' cents"

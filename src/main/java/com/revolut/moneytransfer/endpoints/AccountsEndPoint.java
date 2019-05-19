@@ -78,7 +78,7 @@ public final class AccountsEndPoint extends HttpServlet {
             try {
                 Map<String, Object> body = HttpUtils.getBody(req);
                 String holderName = (String)body.get("holderName");
-                int cents = Integer.parseInt(String.valueOf(body.getOrDefault("cents", 0)));
+                long cents = Long.parseLong(String.valueOf(body.getOrDefault("cents", 0)));
                 Account account = serviceLocator.getAccountService().create(holderName, cents);
 
                 resp.setContentType("text/plain;charset=utf-8");

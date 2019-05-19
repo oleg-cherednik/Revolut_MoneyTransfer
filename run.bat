@@ -1,1 +1,1 @@
-java -cp "build\libs\*" com.revolut.backend.BackendServer %*
+java -jar build/libs/money-transfer-1.0.jar

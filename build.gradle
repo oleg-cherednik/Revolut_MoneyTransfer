@@ -28,3 +28,13 @@ dependencies {
 test {
     useTestNG()
 }
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.revolut.moneytransfer.Application'
+    }
+
+    from {
+        configurations.compile.collect {it.isDirectory() ? it : zipTree(it)}
+    }
+}
